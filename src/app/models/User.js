@@ -17,10 +17,11 @@ class User
      * @return User $users
      */
     all(res){
-        this.conn.query('SELECT * FROM users', (err, results, fields) => {
-            if(err) 
-                throw err;
-           res.send(results); 
+        return new Promise((resolve, reject) => {
+            this.conn.query('SELECT * FROM users', (err, results, fields) => {
+               resolve(results);
+               reject(err);
+            });
         });
     }
 
@@ -32,15 +33,34 @@ class User
      * @return User $user
      */
      find(res, id){
-        this.conn.query(`SELECT * FROM users WHERE id = ${id}`, (err, result, fields) => {
-            if(err) 
-                throw err;
-           res.send(result); 
+        return new Promise((resolve, reject) => {
+            this.conn.query(`SELECT * FROM users WHERE id = ${id}`, (err, result, fields) => {
+                resolve(result);
+                reject(err);
+            });
         });
     }
 
     /**
-     * Fetch one instance of User from database
+     * Fetch User from database by email
+     * 
+     * @param req
+     * @param res
+     * @return User $user
+     */
+     findByEmail(req, res){
+        const email = req.body.email;
+
+        return new Promise((resolve, reject) => {
+            this.conn.query(`SELECT id, email, password FROM users WHERE email = ${email}`, (err, result, fields) => {
+                resolve(result);
+                reject(err);
+            });
+        });
+    }
+
+    /**
+     * create an instance of User in the database
      * 
      * @param req
      * @param res
@@ -50,14 +70,14 @@ class User
         const {name, email, password} = req.body;
 
         let hash = bcrypt.hashSync(password, 10);
-
-        this.conn.query(`INSERT INTO users (name, email, password) VALUES('${name}', '${email}', '${hash}');`, (err, result) => {
-            if(err) 
-                throw err;
-           res.send(result); 
+        
+        return new Promise((resolve, reject) => {
+            this.conn.query(`INSERT INTO users (name, email, password) VALUES('${name}', '${email}', '${hash}');`, (err, result) => {
+                resolve(result);
+                reject(err);
+            });
         });
     }
-
 }
 
 module.exports = User;
