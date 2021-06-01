@@ -16,9 +16,12 @@ class User
      * @param res
      * @return User $users
      */
-    all(res){
+    static all(res){
+        let database = new Database('localhost', 'root', '','trading-app');
+        const conn = database.connect();
+
         return new Promise((resolve, reject) => {
-            this.conn.query('SELECT * FROM users', (err, results, fields) => {
+            conn.query('SELECT * FROM users', (err, results, fields) => {
                resolve(results);
                reject(err);
             });
@@ -28,13 +31,15 @@ class User
     /**
      * Fetch one instance of User from database
      * 
-     * @param res
      * @param id
      * @return User $user
      */
-     find(res, id){
+     static find(id){
+        let database = new Database('localhost', 'root', '','trading-app');
+        const conn = database.connect();
+
         return new Promise((resolve, reject) => {
-            this.conn.query(`SELECT * FROM users WHERE id = ${id}`, (err, result, fields) => {
+            conn.query(`SELECT * FROM users WHERE id = ${id}`, (err, result, fields) => {
                 resolve(result);
                 reject(err);
             });
@@ -44,15 +49,15 @@ class User
     /**
      * Fetch User from database by email
      * 
-     * @param req
-     * @param res
+     * @param email
      * @return User $user
      */
-     findByEmail(req, res){
-        const email = req.body.email;
+    static findByEmail(email, callback){
+        let database = new Database('localhost', 'root', '','trading-app');
+        const conn = database.connect();
 
         return new Promise((resolve, reject) => {
-            this.conn.query(`SELECT id, email, password FROM users WHERE email = ${email}`, (err, result, fields) => {
+            conn.query(`SELECT id, email, password FROM users WHERE email = '${email}'`, (err, result, fields) => {
                 resolve(result);
                 reject(err);
             });
@@ -66,13 +71,16 @@ class User
      * @param res
      * @return User $user
      */
-     create(req, res){
+     static create(req){
+        let database = new Database('localhost', 'root', '','trading-app');
+        const conn = database.connect();
+
         const {name, email, password} = req.body;
 
         let hash = bcrypt.hashSync(password, 10);
         
         return new Promise((resolve, reject) => {
-            this.conn.query(`INSERT INTO users (name, email, password) VALUES('${name}', '${email}', '${hash}');`, (err, result) => {
+            conn.query(`INSERT INTO users (name, email, password) VALUES('${name}', '${email}', '${hash}');`, (err, result) => {
                 resolve(result);
                 reject(err);
             });

@@ -1,6 +1,5 @@
 const express = require('express');
 // const cookieParser = require("cookie-parser");
-let Database = require('./src/app/config/Database.js');
 let User = require('./src/app/models/User.js');
 let AuthController = require('./src/app/controllers/AuthController.js');
 
@@ -13,16 +12,15 @@ app.get('/', (req, res) => {
 });
 
 app.get('/users', (req, res) => {
-    user = new User();
-    result = user.all(res);
+    result = User.all(res);
 
     result.then((val) => { res.send(val);})
             .catch((err) => { console.log(err)});
 });
 
 app.get('/users/:id', (req, res, id) => {
-    user = new User();
-    let result = user.find(res, req.params.id);
+    
+    let result = User.find(req.params.id);
 
     result.then((val) => { res.send(val);})
             .catch((err) => { console.log(err)});

@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 let User = require('./../models/User.js');
 
 class AuthController{
@@ -9,26 +10,15 @@ class AuthController{
 
     login(req, res){
         const {email, password} = req.body;
-
-        let usr = new User();
-        let result = usr.findByEmail(req, res);
         
-        
-        result.then((user) => {
-            res.send(user);
-        })
-                .catch((err) => {
-                    console.log(err);
-                });
+        let result = User.findByEmail(email);
 
-        // bcrypt.compareSync(password, hash);
-        // res.cookie('AuthToken', authToken);
+        result.then((user) => { this.authenticate(password, user, res) })
+                .catch((err) => { console.log(err) });
     }
 
     register(req, res){
-        let user = new User();
-
-        let result = user.create(req, res);
+        let result = User.create(req);
 
         result.then(() => {
             let authToken = this.createAuthToken();
@@ -38,6 +28,20 @@ class AuthController{
                 .catch((err) => {
                     console.log(err);
                 });
+    }
+
+    authenticate(password, user, res){
+        if(Array.isArray(user) && user.length ==! 0){
+            const hash = user[0].password;
+            
+            if(bcrypt.compareSync(password, hash)){
+                const authToken = this.createAuthToken();
+                res.cookie('AuthToken', authToken);
+                res.send(authToken);
+            }else
+                res.status(403).send('Email or password invalid!');
+        }else
+            res.status(404).send('User email not found!!');
     }
 }
 
