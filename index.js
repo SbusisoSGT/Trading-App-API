@@ -1,9 +1,11 @@
 const express = require('express');
+const cors = require('cors');
 // const cookieParser = require("cookie-parser");
 let User = require('./src/app/models/User.js');
 let AuthController = require('./src/app/controllers/AuthController.js');
 
 let app = express();
+app.use(cors())
 app.use(express.json());
 // app.use(cookieParser);
 

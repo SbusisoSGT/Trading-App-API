@@ -13,8 +13,8 @@ class AuthController{
         
         let result = User.findByEmail(email);
 
-        result.then((user) => { this.authenticate(password, user, res) })
-                .catch((err) => { console.log(err) });
+        result.then(user => { this.authenticate(password, user, res) })
+                .catch(err => { console.log(err) });
     }
 
     register(req, res){
@@ -23,7 +23,7 @@ class AuthController{
         result.then(() => {
             let authToken = this.createAuthToken();
             res.cookie('token', authToken);
-            res.send(authToken);
+            res.send(JSON.stringify(authToken));
         })
                 .catch((err) => {
                     console.log(err);
@@ -37,11 +37,11 @@ class AuthController{
             if(bcrypt.compareSync(password, hash)){
                 const authToken = this.createAuthToken();
                 res.cookie('AuthToken', authToken);
-                res.send(authToken);
+                res.send(JSON.stringify(authToken));
             }else
-                res.status(403).send('Email or password invalid!');
+                res.status(403).send(JSON.stringify('Email or password invalid!'));
         }else
-            res.status(404).send('User email not found!!');
+            res.status(403).send(JSON.stringify('Email or password invalid!'));
     }
 }
 
