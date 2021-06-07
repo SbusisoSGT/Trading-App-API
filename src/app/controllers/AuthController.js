@@ -13,7 +13,7 @@ class AuthController{
         
         let result = User.findByEmail(email);
 
-        result.then(user => { this.authenticate(password, user, res) })
+        result.then(user => { this.validateLogin(password, user, res) })
                 .catch(err => { console.log(err) });
     }
 
@@ -21,27 +21,52 @@ class AuthController{
         let result = User.create(req);
 
         result.then(() => {
-            let authToken = this.createAuthToken();
-            res.cookie('token', authToken);
-            res.send(JSON.stringify(authToken));
+            const authToken = attemptLogin(req.body.email);
+            res.cookie('authToken', authToken, {maxAge: 7200000}); // Signed token expires after 2hrs 
+            res.json(authToken);
         })
                 .catch((err) => {
                     console.log(err);
                 });
     }
 
-    authenticate(password, user, res){
+    /**
+     * 
+     * Login user into the application and return their Auth token
+     * 
+     * @param email
+     * @return authToken
+     */
+    attemptLogin(email){
+        let authToken = this.createAuthToken();
+        const credentials = {email: email, authToken: authToken};
+
+        let result = User.saveAuthToken(credentials);
+
+        result.catch(err => {console.log(err)});
+        
+        return authToken;
+    }
+
+    /**
+     * Validate user's login request
+     * 
+     * @param password 
+     * @param user 
+     * @param res 
+     */
+    validateLogin(password, user, res){
         if(Array.isArray(user) && user.length ==! 0){
             const hash = user[0].password;
             
             if(bcrypt.compareSync(password, hash)){
-                const authToken = this.createAuthToken();
-                res.cookie('AuthToken', authToken);
-                res.send(JSON.stringify(authToken));
+                const authToken = this.attemptLogin(user[0].email);
+                res.cookie('authToken', authToken, {maxAge: 7200000}); // Signed token expires after 2hrs
+                res.json(authToken);
             }else
-                res.status(403).send(JSON.stringify('Email or password invalid!'));
+                res.status(403).json('Email or password invalid!');
         }else
-            res.status(403).send(JSON.stringify('Email or password invalid!'));
+            res.status(403).json('Email or password invalid!');
     }
 }
 

@@ -1,45 +1,9 @@
 const express = require('express');
-const cors = require('cors');
-// const cookieParser = require("cookie-parser");
-let User = require('./src/app/models/User.js');
-let AuthController = require('./src/app/controllers/AuthController.js');
+const dotenv = require('./src/app/config/dotenv')
+const api = require('./src/app/routes/api.js');
 
 let app = express();
-app.use(cors())
-app.use(express.json());
-// app.use(cookieParser);
-
-app.get('/', (req, res) => {
-    res.send("Hello world!");
-});
-
-app.get('/users', (req, res) => {
-    result = User.all(res);
-
-    result.then((val) => { res.send(val);})
-            .catch((err) => { console.log(err)});
-});
-
-app.get('/users/:id', (req, res, id) => {
-    
-    let result = User.find(req.params.id);
-
-    result.then((val) => { res.send(val);})
-            .catch((err) => { console.log(err)});
-});
-
-app.post('/register', (req, res) => {
-    let auth = new AuthController();
-
-    auth.register(req, res);
-});
-
-app.post('/login', (req, res) => {
-    let auth = new AuthController();
-
-    auth.login(req, res); 
-});
-
+app.use('/api', api);
 
 app.listen(8001, () => {
     console.log('Server running at 127.0.0.1:8001');
